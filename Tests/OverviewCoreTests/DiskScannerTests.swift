@@ -5,9 +5,12 @@ final class DiskScannerTests: XCTestCase {
     private var root: URL!
 
     override func setUpWithError() throws {
-        // Resolve symlinks (/var -> /private/var on macOS) so paths compare equal.
-        let base = FileManager.default.temporaryDirectory.resolvingSymlinksInPath()
-        root = base.appendingPathComponent("overview-tests-\(UUID().uuidString)")
+        // The scanner reports real paths, and on macOS the temporary folder is
+        // behind a symlink (/var -> /private/var).
+        let resolved = try XCTUnwrap(realpath(FileManager.default.temporaryDirectory.path, nil))
+        defer { free(resolved) }
+        root = URL(fileURLWithPath: String(cString: resolved), isDirectory: true)
+            .appendingPathComponent("overview-tests-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
     }
 
