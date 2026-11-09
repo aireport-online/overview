@@ -8,38 +8,42 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 OUT="${1:-build/screenshots}"
-BINARY="$PWD/build/Overview.app/Contents/MacOS/Overview"
+APP="$PWD/build/Overview.app"
 SAMPLE="$(mktemp -d)/Home"
 mkdir -p "$OUT"
 Scripts/make-sample-folder.sh "$SAMPLE"
 
-# shoot <name> [arguments for the app...]
+# shoot <name> [arguments for `open`...]
 shoot() {
     local name="$1"
     shift
-    "$BINARY" "$@" &
-    local pid=$!
+    open -n -a "$APP" "$@"
     sleep 8
-    if ! kill -0 "$pid" 2>/dev/null; then
-        echo "Overview quit unexpectedly ($name)" >&2
+    local pid
+    if ! pid="$(pgrep -n -x Overview)"; then
+        echo "Overview is not running ($name)" >&2
         exit 1
     fi
     local window
     if window="$(swift Scripts/window-id.swift "$pid")"; then
         screencapture -x -o -l "$window" "$OUT/$name.png"
     else
-        echo "No window found for $name; capturing the whole screen" >&2
-        screencapture -x "$OUT/$name.png"
+        echo "Overview shows no window ($name); saving the whole screen" >&2
+        screencapture -x "$OUT/$name-failed.png"
+        kill "$pid"
+        exit 1
     fi
     kill "$pid"
-    wait "$pid" 2>/dev/null || true
+    while kill -0 "$pid" 2>/dev/null; do sleep 0.2; done
 }
 
 shoot welcome
-shoot sunburst -chartStyle sunburst "$SAMPLE"
-shoot treemap -chartStyle treemap "$SAMPLE"
-shoot sunburst-dark -AppleInterfaceStyle Dark -chartStyle sunburst "$SAMPLE"
-shoot treemap-dark -AppleInterfaceStyle Dark -chartStyle treemap "$SAMPLE"
+shoot sunburst --args -chartStyle sunburst -scan "$SAMPLE"
+shoot treemap --args -chartStyle treemap -scan "$SAMPLE"
+shoot sunburst-dark --args -AppleInterfaceStyle Dark -chartStyle sunburst -scan "$SAMPLE"
+shoot treemap-dark --args -AppleInterfaceStyle Dark -chartStyle treemap -scan "$SAMPLE"
+# The way Finder opens a folder with the app: by Dock icon or "Open With".
+shoot opened-folder "$SAMPLE"
 
 rm -rf "$SAMPLE"
 ls -l "$OUT"

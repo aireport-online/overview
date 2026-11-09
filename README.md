@@ -58,7 +58,7 @@ swift test
 swift run Overview
 ```
 
-`swift run Overview /some/folder` starts scanning that folder right away. You can also open `Package.swift` in Xcode.
+`swift run Overview -scan /some/folder` starts scanning that folder right away. You can also open `Package.swift` in Xcode.
 
 | Path | What is in it |
 | --- | --- |

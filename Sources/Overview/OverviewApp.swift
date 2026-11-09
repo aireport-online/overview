@@ -39,19 +39,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NSApp.setActivationPolicy(.regular)
         NSApp.activate()
 
-        // `Overview.app/Contents/MacOS/Overview /some/folder` scans right away.
-        if let path = CommandLine.arguments.dropFirst().last, path.hasPrefix("/") {
-            var isDirectory: ObjCBool = false
-            if FileManager.default.fileExists(atPath: path, isDirectory: &isDirectory), isDirectory.boolValue {
-                AppModel.shared.scan(url: URL(fileURLWithPath: path))
-            }
-        }
-    }
-
-    /// A folder dropped on the Dock icon.
-    func application(_ application: NSApplication, open urls: [URL]) {
-        if let url = urls.first {
-            AppModel.shared.scan(url: url)
+        // `open -a Overview --args -scan /some/folder` scans right away.
+        if let path = UserDefaults.standard.string(forKey: "scan") {
+            AppModel.shared.scan(url: URL(fileURLWithPath: path))
         }
     }
 
@@ -73,6 +63,10 @@ struct RootView: View {
             case .results:
                 ResultsView()
             }
+        }
+        // A folder dropped on the Dock icon or opened with "Open With".
+        .onOpenURL { url in
+            model.scan(url: url)
         }
         .alert("Something went wrong", isPresented: errorIsPresented) {
             Button("OK") {}
