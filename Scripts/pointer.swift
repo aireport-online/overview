@@ -43,14 +43,16 @@ while let line = readLine() {
         let target = CGPoint(x: originX + numbers[0], y: originY + numbers[1])
         let duration = numbers.count > 2 ? numbers[2] : 0.6
         let start = position
-        let steps = max(Int(duration * 120), 1)
-        for step in 1...steps {
-            // Ease in and out, like a hand.
-            let time = Double(step) / Double(steps)
+        let began = Date()
+        while true {
+            // Follow the clock rather than counting steps, so a glide takes
+            // exactly as long as asked. Ease in and out, like a hand.
+            let time = min(Date().timeIntervalSince(began) / max(duration, 0.001), 1)
             let eased = CGFloat(time * time * (3 - 2 * time))
             position = CGPoint(x: start.x + (target.x - start.x) * eased, y: start.y + (target.y - start.y) * eased)
             post(.mouseMoved)
-            pause(duration / Double(steps))
+            if time >= 1 { break }
+            pause(1.0 / 120)
         }
     case "click":
         post(.leftMouseDown)

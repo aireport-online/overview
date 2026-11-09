@@ -54,23 +54,22 @@ def read_marks(path):
 
 
 def find_scan_frame(video, window, guess):
-    """The moment the scanning screen appears: the first big change of the
-    window after the click. Returns seconds into the recording."""
+    """The moment the scanning screen appears: the first frame after the click
+    in which the window as a whole differs from how it looked before. (The
+    pointer and hover effects only change small parts of it.) Returns seconds
+    into the recording."""
     x, y, width, height = window
-    start = max(guess - 3.0, 0)
+    start = max(guess - 1.5, 0)
     with tempfile.TemporaryDirectory() as folder:
         run("ffmpeg", "-v", "error", "-ss", f"{start}", "-t", "8", "-i", str(video),
             "-vf", f"fps=30,crop={width}:{height}:{x}:{y},scale=320:-1", f"{folder}/f%04d.png")
         frames = sorted(Path(folder).glob("f*.png"))
-        previous = None
+        reference = Image.open(frames[0]).convert("L")
         for index, frame in enumerate(frames):
-            image = Image.open(frame).convert("L")
-            if previous is not None:
-                histogram = ImageChops.difference(image, previous).histogram()
-                change = sum(level * count for level, count in enumerate(histogram)) / sum(histogram)
-                if change > 4:
-                    return start + index / 30
-            previous = image
+            histogram = ImageChops.difference(Image.open(frame).convert("L"), reference).histogram()
+            change = sum(level * count for level, count in enumerate(histogram)) / sum(histogram)
+            if change > 3:
+                return start + index / 30
     raise SystemExit("could not find the start of the scan in the recording")
 
 

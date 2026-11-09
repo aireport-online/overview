@@ -128,12 +128,17 @@ wait 1.6
 move 1067 206 0.9
 wait 0.8
 rightclick
-wait 2.5
-move 1137 277 0.6
-wait 1.0
+wait 2.2
+key 125
+wait 0.3
+key 125
+wait 0.3
+key 125
+wait 0.8
 mark menu
-click
+key 36
 wait 3.0
+mark dialog
 key 53
 wait 1.5
 # 8. Back to the sunburst.

@@ -6,9 +6,11 @@ A disk space analyzer for macOS. Overview scans a disk or folder and shows what 
 
 **[Watch the walkthrough](docs/video/overview-walkthrough.mp4)** (Dutch voice-over with captions).
 
-![The treemap](docs/screenshots/treemap.png)
+![The treemap, zoomed in on a folder](docs/screenshots/treemap-zoomed.png)
 
 ![The start screen](docs/screenshots/welcome.png)
+
+![Scanning a startup disk](docs/screenshots/scanning.png)
 
 ## What it does
 
