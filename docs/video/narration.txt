@@ -1,0 +1,11 @@
+# The Dutch voice-over of the walkthrough video. One part per line:
+# <mark in the recording> | <sentences, separated by " / ">
+# Voice: "Linda Dutch Coach" (ElevenLabs, eleven_v4). Audio in voice/part<N>.mp3.
+intro | Dit is Overview. / De app laat zien wat er ruimte inneemt op je Mac. / Kies een schijf of een map, en klik op Scan.
+scan | Overview telt nu alle bestanden. / Dat duurt meestal maar een paar seconden.
+results | Het resultaat is een zonnediagram. / In het midden staat de map, en elke ring is een niveau dieper. / Hoe groter het vlak, hoe meer ruimte het inneemt.
+hover | Wijs een vlak aan, en onderin zie je wat het is. / De lijst rechts toont dezelfde inhoud, van groot naar klein.
+zoom | Klik op een vlak om in die map te duiken. / Klik op het midden om weer een niveau terug te gaan.
+treemap | Liever rechthoeken? Schakel dan naar de treemap. / Elk bestand is een tegel, en de oppervlakte is de grootte.
+largest | Onder Grootste bestanden vind je snel de grootste ruimtevreters. / Klik met rechts om een bestand in de Finder te tonen, / of om het naar de prullenmand te verplaatsen.
+outro | Zo zie je in één oogopslag waar je schijfruimte blijft. / Dat is Overview.
