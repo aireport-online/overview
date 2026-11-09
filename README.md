@@ -4,7 +4,7 @@ A disk space analyzer for macOS. Overview scans a disk or folder and shows what 
 
 ![The sunburst chart](docs/screenshots/sunburst.png)
 
-**[Watch the walkthrough](docs/video/overview-walkthrough.mp4)** (Dutch voice-over with captions).
+**[Watch the walkthrough](docs/video/overview-walkthrough.mp4)**: 46 seconds, Dutch voice-over with captions. It is a first cut; [docs/video](docs/video) says what is still missing.
 
 ![The treemap, zoomed in on a folder](docs/screenshots/treemap-zoomed.png)
 

@@ -37,7 +37,10 @@ CANVAS = (1920, 1080)
 
 
 def run(*command):
-    return subprocess.run(command, check=True, capture_output=True, text=True).stdout
+    result = subprocess.run(command, capture_output=True, text=True)
+    if result.returncode != 0:
+        raise SystemExit(f"{command[0]} failed ({result.returncode}): {result.stderr[-2000:]}")
+    return result.stdout
 
 
 def duration(path):
