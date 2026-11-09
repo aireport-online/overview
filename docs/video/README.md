@@ -15,4 +15,4 @@ Scripts/build-app.sh && Scripts/walkthrough.sh build/walkthrough
 Scripts/assemble-video.py build/walkthrough docs/video/overview-walkthrough.mp4
 ```
 
-The first step needs a Mac and resets the app's preferences. The pointer positions in it are for a 1280 x 800 window, and the terminal needs Accessibility access to move the pointer. The second step needs ffmpeg, Python with Pillow, and the Inter font; it runs on Linux too.
+The first step needs a Mac and resets the app's preferences. On GitHub, starting the Build workflow by hand records it too and attaches the result as the `walkthrough` artifact. The pointer positions in it are for a 1280 x 800 window, and the terminal needs Accessibility access to move the pointer. The second step needs ffmpeg, Python with Pillow, and the Inter font; it runs on Linux too.

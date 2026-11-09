@@ -27,7 +27,9 @@ jobs:
       - name: Launch the app and take screenshots
         run: Scripts/screenshots.sh build/screenshots
 
+      # Only when the workflow is started by hand: it adds two minutes.
       - name: Record the walkthrough
+        if: github.event_name == 'workflow_dispatch'
         run: Scripts/walkthrough.sh build/walkthrough
 
       - name: Zip the app
