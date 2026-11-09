@@ -4,7 +4,11 @@ A disk space analyzer for macOS. Overview scans a disk or folder and shows what 
 
 ![The sunburst chart](docs/screenshots/sunburst.png)
 
-![The treemap](docs/screenshots/treemap.png)
+![The treemap, zoomed in on a folder, in dark mode](docs/screenshots/treemap-dark.png)
+
+A scan of a whole startup disk (the macOS machine that builds this project: 2.3 million files in 45 seconds):
+
+![A scan of a startup disk](docs/screenshots/full-disk.png)
 
 ## What it does
 
@@ -58,7 +62,7 @@ swift test
 swift run Overview
 ```
 
-`swift run Overview -scan /some/folder` starts scanning that folder right away. You can also open `Package.swift` in Xcode.
+`swift run Overview -scan /some/folder` starts scanning that folder right away, and `-appearance dark` or `-appearance light` overrides the system appearance. You can also open `Package.swift` in Xcode.
 
 | Path | What is in it |
 | --- | --- |
@@ -66,4 +70,4 @@ swift run Overview
 | `Sources/Overview` | The SwiftUI app. |
 | `Resources` | `Info.plist`, the icon and the Dutch translation. |
 | `Scripts/build-app.sh` | Builds `build/Overview.app`. |
-| `Scripts/screenshots.sh` | Launches the app on a sample folder and saves the pictures above. |
+| `Scripts/screenshots.sh` | Launches the app on a sample folder, clicks around in it and saves pictures of the window. The build runs it as a check. |
