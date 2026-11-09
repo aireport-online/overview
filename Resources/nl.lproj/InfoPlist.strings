@@ -1,0 +1,6 @@
+"CFBundleDisplayName" = "Overview";
+"NSDesktopFolderUsageDescription" = "Overview leest de grootte van de bestanden op je bureaublad om te laten zien wat ruimte inneemt.";
+"NSDocumentsFolderUsageDescription" = "Overview leest de grootte van de bestanden in je map Documenten om te laten zien wat ruimte inneemt.";
+"NSDownloadsFolderUsageDescription" = "Overview leest de grootte van de bestanden in je map Downloads om te laten zien wat ruimte inneemt.";
+"NSRemovableVolumesUsageDescription" = "Overview leest de grootte van de bestanden op deze schijf om te laten zien wat ruimte inneemt.";
+"NSNetworkVolumesUsageDescription" = "Overview leest de grootte van de bestanden op deze netwerkschijf om te laten zien wat ruimte inneemt.";

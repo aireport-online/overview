@@ -1,0 +1,58 @@
+/* Dutch. The keys are the English texts used in the source code. */
+
+/* Start screen */
+"See what is taking up space on your Mac." = "Bekijk wat er ruimte inneemt op je Mac.";
+"%@ available of %@" = "%@ beschikbaar van %@";
+"Scan" = "Scan";
+"Home Folder" = "Thuismap";
+"Choose Folder…" = "Kies map…";
+"You can also drop a folder on this window." = "Je kunt ook een map naar dit venster slepen.";
+"Choose a folder or disk to scan" = "Kies een map of schijf om te scannen";
+
+/* Scanning */
+"Scanning %@…" = "%@ scannen…";
+"Cancel" = "Annuleer";
+"1 file" = "1 bestand";
+"%lld files" = "%lld bestanden";
+
+/* Results */
+"%@ · %@ · scanned in %@ s" = "%@ · %@ · gescand in %@ s";
+"Start Over" = "Opnieuw beginnen";
+"Choose another disk or folder" = "Kies een andere schijf of map";
+"Enclosing Folder" = "Bovenliggende map";
+"Go to the enclosing folder" = "Ga naar de bovenliggende map";
+"Chart" = "Diagram";
+"Sunburst" = "Zonnediagram";
+"Treemap" = "Treemap";
+"Switch between the sunburst and the treemap" = "Wissel tussen het zonnediagram en de treemap";
+"Scan Again" = "Scan opnieuw";
+"Scan this location again" = "Scan deze locatie opnieuw";
+"Nothing to show" = "Niets om te tonen";
+"This folder is empty or takes no space on disk." = "Deze map is leeg of neemt geen ruimte in op de schijf.";
+"View" = "Weergave";
+"Contents" = "Inhoud";
+"Largest Files" = "Grootste bestanden";
+"and %lld smaller items (%@)" = "en %lld kleinere onderdelen (%@)";
+"%lld folders could not be read, so the totals are incomplete. Give Overview Full Disk Access to see everything." = "%lld mappen konden niet worden gelezen, dus de totalen zijn onvolledig. Geef Overview volledige schijftoegang om alles te zien.";
+"Open Privacy Settings" = "Open privacy-instellingen";
+"Hide this message" = "Verberg deze melding";
+
+/* Item menu */
+"Zoom In" = "Zoom in";
+"Show in Finder" = "Toon in Finder";
+"Copy Path" = "Kopieer pad";
+"Move to Trash…" = "Verplaats naar prullenmand…";
+"Move to Trash" = "Verplaats naar prullenmand";
+"Move this item to the Trash?" = "Dit onderdeel naar de prullenmand verplaatsen?";
+"“%@” (%@) will be moved to the Trash. You can put it back from there." = "‘%@’ (%@) wordt naar de prullenmand verplaatst. Je kunt het daar weer terugzetten.";
+
+/* Menu bar */
+"Scan Folder…" = "Scan map…";
+"Scan Home Folder" = "Scan thuismap";
+"Go to Enclosing Folder" = "Ga naar bovenliggende map";
+
+/* Errors */
+"Something went wrong" = "Er ging iets mis";
+"OK" = "OK";
+"“%@” could not be found." = "‘%@’ is niet gevonden.";
+"“%@” is not a folder." = "‘%@’ is geen map.";

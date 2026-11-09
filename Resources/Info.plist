@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleName</key>
+	<string>Overview</string>
+	<key>CFBundleDisplayName</key>
+	<string>Overview</string>
+	<key>CFBundleExecutable</key>
+	<string>Overview</string>
+	<key>CFBundleIdentifier</key>
+	<string>online.aireport.overview</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0</string>
+	<key>CFBundleVersion</key>
+	<string>1</string>
+	<key>CFBundleIconFile</key>
+	<string>AppIcon</string>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>en</string>
+		<string>nl</string>
+	</array>
+	<key>LSMinimumSystemVersion</key>
+	<string>14.0</string>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.utilities</string>
+	<key>NSHighResolutionCapable</key>
+	<true/>
+	<key>NSPrincipalClass</key>
+	<string>NSApplication</string>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>Folder</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSHandlerRank</key>
+			<string>Alternate</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>public.folder</string>
+				<string>public.volume</string>
+			</array>
+		</dict>
+	</array>
+	<key>NSDesktopFolderUsageDescription</key>
+	<string>Overview reads the sizes of the files on your Desktop to show what takes up space.</string>
+	<key>NSDocumentsFolderUsageDescription</key>
+	<string>Overview reads the sizes of the files in your Documents folder to show what takes up space.</string>
+	<key>NSDownloadsFolderUsageDescription</key>
+	<string>Overview reads the sizes of the files in your Downloads folder to show what takes up space.</string>
+	<key>NSRemovableVolumesUsageDescription</key>
+	<string>Overview reads the sizes of the files on this disk to show what takes up space.</string>
+	<key>NSNetworkVolumesUsageDescription</key>
+	<string>Overview reads the sizes of the files on this network disk to show what takes up space.</string>
+</dict>
+</plist>
