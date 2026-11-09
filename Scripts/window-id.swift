@@ -1,4 +1,5 @@
-// Prints the id of the first normal window of a process, for `screencapture -l`.
+// Prints the id and frame of the first normal window of a process, as
+// "id x y width height", for `screencapture -l` and Scripts/pointer.swift.
 //
 //   swift Scripts/window-id.swift <pid>
 import CoreGraphics
@@ -13,9 +14,11 @@ let windows = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopEl
 for window in windows {
     guard (window[kCGWindowOwnerPID as String] as? Int) == pid,
           (window[kCGWindowLayer as String] as? Int) == 0,
-          let id = window[kCGWindowNumber as String] as? Int
+          let id = window[kCGWindowNumber as String] as? Int,
+          let bounds = window[kCGWindowBounds as String] as? [String: Double]
     else { continue }
-    print(id)
+    let frame = ["X", "Y", "Width", "Height"].map { String(Int(bounds[$0] ?? 0)) }
+    print(([String(id)] + frame).joined(separator: " "))
     exit(0)
 }
 exit(1)

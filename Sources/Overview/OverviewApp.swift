@@ -39,6 +39,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NSApp.setActivationPolicy(.regular)
         NSApp.activate()
 
+        // `-appearance dark` or `-appearance light` overrides the system setting.
+        switch UserDefaults.standard.string(forKey: "appearance") {
+        case "dark":
+            NSApp.appearance = NSAppearance(named: .darkAqua)
+        case "light":
+            NSApp.appearance = NSAppearance(named: .aqua)
+        default:
+            break
+        }
+
         // `open -a Overview --args -scan /some/folder` scans right away.
         if let path = UserDefaults.standard.string(forKey: "scan") {
             AppModel.shared.scan(url: URL(fileURLWithPath: path))

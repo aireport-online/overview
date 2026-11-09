@@ -76,38 +76,52 @@ private struct TreemapTiles: View {
         }
     }
 
-    /// Draws a name (and optionally a size below or to the right of it),
-    /// clipped to `rect`.
-    private func drawLabel(_ name: String, detail: String?, in rect: CGRect, context: GraphicsContext, trailing: String? = nil) {
-        var clipped = context
-        clipped.clip(to: Path(rect.insetBy(dx: 3, dy: 0)))
+    private static let nameFont = Font.system(size: 11, weight: .semibold)
+    private static let detailFont = Font.system(size: 10.5)
+    private static let unbounded = CGSize(width: 4000, height: 40)
 
-        var nameWidth = rect.width - 10
+    /// Draws a name, with optionally a size below it (`detail`) or at the
+    /// right edge (`trailing`), inside `rect`.
+    private func drawLabel(_ name: String, detail: String?, in rect: CGRect, context: GraphicsContext, trailing: String? = nil) {
+        var context = context
+        context.clip(to: Path(rect))
+
+        var available = rect.width - 10
         if let trailing {
-            let text = clipped.resolve(
-                Text(trailing).font(.system(size: 10.5)).foregroundColor(.white.opacity(0.75))
-            )
-            let size = text.measure(in: CGSize(width: 400, height: 20))
-            if size.width + 60 < rect.width {
-                clipped.draw(text, at: CGPoint(x: rect.maxX - 5, y: rect.minY + 2.5), anchor: .topTrailing)
-                nameWidth -= size.width + 8
+            let text = context.resolve(Text(trailing).font(Self.detailFont).foregroundColor(.white.opacity(0.75)))
+            let width = text.measure(in: Self.unbounded).width
+            if width + 60 < rect.width {
+                context.draw(text, at: CGPoint(x: rect.maxX - 5, y: rect.minY + 2.5), anchor: .topTrailing)
+                available -= width + 8
             }
         }
-
-        var nameContext = clipped
-        nameContext.clip(to: Path(CGRect(x: rect.minX, y: rect.minY, width: max(nameWidth + 5, 0), height: rect.height)))
-        nameContext.draw(
-            Text(name).font(.system(size: 11, weight: .semibold)).foregroundColor(.white),
-            at: CGPoint(x: rect.minX + 5, y: rect.minY + 2),
-            anchor: .topLeading
-        )
-        if let detail {
-            clipped.draw(
-                Text(detail).font(.system(size: 10.5)).foregroundColor(.white.opacity(0.8)),
-                at: CGPoint(x: rect.minX + 5, y: rect.minY + 17),
-                anchor: .topLeading
-            )
+        if let text = fitted(name, font: Self.nameFont, color: .white, width: available, context: context) {
+            context.draw(text, at: CGPoint(x: rect.minX + 5, y: rect.minY + 2), anchor: .topLeading)
         }
+        if let detail, let text = fitted(detail, font: Self.detailFont, color: .white.opacity(0.8), width: rect.width - 10, context: context) {
+            context.draw(text, at: CGPoint(x: rect.minX + 5, y: rect.minY + 17), anchor: .topLeading)
+        }
+    }
+
+    /// `string` as text that fits in `width`, shortened with an ellipsis when
+    /// needed. Nil when not even a couple of characters fit.
+    private func fitted(_ string: String, font: Font, color: Color, width: CGFloat, context: GraphicsContext) -> GraphicsContext.ResolvedText? {
+        var kept = string.count
+        var candidate = string
+        for _ in 0..<8 {
+            let text = context.resolve(Text(candidate).font(font).foregroundColor(color))
+            let measured = text.measure(in: Self.unbounded).width
+            if measured <= width {
+                return text
+            }
+            // Estimate how many characters fit, and try again.
+            kept = min(Int(Double(kept) * Double(width / measured)), kept - 1)
+            if kept < 2 {
+                return nil
+            }
+            candidate = String(string.prefix(kept)) + "…"
+        }
+        return nil
     }
 }
 

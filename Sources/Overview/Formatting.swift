@@ -63,5 +63,5 @@ enum Palette {
     }
 
     /// Bundled small items in the sunburst.
-    static let bundled = Color(white: 0.62)
+    static let bundled = Color(white: 0.68)
 }
