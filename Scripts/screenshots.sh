@@ -74,9 +74,9 @@ shoot opened-folder "$SAMPLE"
 POINTER="click 357 296; move 395 368" shoot zoomed --args -appearance light -chartStyle sunburst -scan "$SAMPLE"
 # Click the Movies tile in the treemap, then point at a file.
 POINTER="click 120 200; move 120 250" shoot zoomed-treemap --args -appearance dark -chartStyle treemap -scan "$SAMPLE"
-
-# TEMPORARY: one complete scan of the startup disk, to check totals and timing.
-DELAY=240 shoot full-disk --args -appearance light -chartStyle sunburst -scan /
+# The Dutch translation, with the list of largest files.
+shoot welcome-nl --args -AppleLanguages "(nl)" -appearance light
+shoot largest-files-nl --args -AppleLanguages "(nl)" -appearance light -chartStyle sunburst -sidebarTab largest -scan "$SAMPLE"
 
 rm -rf "$SAMPLE"
 ls -l "$OUT"
