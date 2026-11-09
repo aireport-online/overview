@@ -5,15 +5,21 @@ import SwiftUI
 struct TreemapChart: View {
     @Environment(AppModel.self) private var model
     let focus: FileNode
-    /// Not read, but a new value makes the chart lay out again.
+    /// A new value makes the chart lay out and build up again.
     let revision: Int
+
+    private struct BloomKey: Hashable {
+        let focus: ObjectIdentifier
+        let revision: Int
+    }
 
     var body: some View {
         GeometryReader { proxy in
-            let bounds = CGRect(origin: .zero, size: proxy.size).insetBy(dx: 10, dy: 10)
+            let bounds = CGRect(origin: .zero, size: proxy.size).insetBy(dx: 2, dy: 2)
             let items = TreemapLayout.layout(root: focus, in: bounds)
             ZStack {
-                TreemapTiles(items: items)
+                TreemapBloom(items: items)
+                    .id(BloomKey(focus: focus.id, revision: revision))
                 TreemapHighlight(items: items)
             }
             .contentShape(Rectangle())
@@ -39,46 +45,84 @@ struct TreemapChart: View {
     }
 }
 
-private struct TreemapTiles: View {
+/// Plays the build-up of the treemap once: the tiles pop in one after another.
+private struct TreemapBloom: View {
     let items: [TreemapItem]
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var progress = 0.0
+
+    var body: some View {
+        TreemapTiles(items: items, progress: reduceMotion ? 1 : progress)
+            .onAppear {
+                withAnimation(.easeOut(duration: 0.8)) {
+                    progress = 1
+                }
+            }
+    }
+}
+
+private struct TreemapTiles: View, Animatable {
+    let items: [TreemapItem]
+    /// 0 is empty, 1 has every tile in place.
+    var progress: Double
+
+    var animatableData: Double {
+        get { progress }
+        set { progress = newValue }
+    }
+
+    private static let nameFont = Font.system(size: 11, weight: .semibold)
+    private static let detailFont = Font.system(size: 10.5)
+    private static let unbounded = CGSize(width: 4000, height: 40)
+    /// The share of the animation over which the tiles start, first to last.
+    private static let spread = 0.6
 
     var body: some View {
         Canvas { context, _ in
-            for item in items {
-                let rect = item.rect.insetBy(dx: 0.5, dy: 0.5)
-                guard rect.width > 0, rect.height > 0 else { continue }
+            let count = max(Double(items.count), 1)
+            for (index, item) in items.enumerated() {
+                let delay = Self.spread * Double(index) / count
+                let linear = min(max((progress - delay) / (1 - Self.spread), 0), 1)
+                guard linear > 0 else { continue }
+                let arrival = 1 - pow(1 - linear, 3)
 
+                // Tiles grow out of their own centre.
+                let full = item.rect.insetBy(dx: 0.5, dy: 0.5)
+                guard full.width > 0, full.height > 0 else { continue }
+                let scale = CGFloat(0.55 + 0.45 * arrival)
+                let rect = full.insetBy(dx: full.width * (1 - scale) / 2, dy: full.height * (1 - scale) / 2)
+
+                var tile = context
+                tile.opacity = min(linear * 2, 1)
                 if item.isLeaf {
-                    context.fill(
-                        Path(roundedRect: rect, cornerRadius: 1.5),
+                    tile.fill(
+                        Path(roundedRect: rect, cornerRadius: 2.5),
                         with: .linearGradient(
                             Palette.tile(branch: item.branch, depth: item.depth),
                             startPoint: rect.origin,
                             endPoint: CGPoint(x: rect.maxX, y: rect.maxY)
                         )
                     )
+                    guard arrival > 0.95 else { continue }
                     if rect.width >= 64 && rect.height >= 34 {
-                        drawLabel(item.node.name, detail: Format.bytes(item.node.size), in: rect, context: context)
+                        drawLabel(item.node.name, detail: Format.bytes(item.node.size), in: rect, context: tile)
                     } else if rect.width >= 48 && rect.height >= 18 {
-                        drawLabel(item.node.name, detail: nil, in: rect, context: context)
+                        drawLabel(item.node.name, detail: nil, in: rect, context: tile)
                     }
                 } else {
-                    context.fill(
-                        Path(roundedRect: rect, cornerRadius: 3),
-                        with: .color(Palette.frame(branch: item.branch, depth: item.depth))
+                    tile.fill(
+                        Path(roundedRect: rect, cornerRadius: 5),
+                        with: .color(Palette.frame(branch: item.branch, depth: item.depth).opacity(0.88))
                     )
-                    if item.hasHeader {
+                    if item.hasHeader && arrival > 0.95 {
                         let header = CGRect(x: rect.minX, y: rect.minY, width: rect.width, height: 17)
-                        drawLabel(item.node.name, detail: nil, in: header, context: context, trailing: Format.bytes(item.node.size))
+                        drawLabel(item.node.name, detail: nil, in: header, context: tile, trailing: Format.bytes(item.node.size))
                     }
                 }
             }
         }
     }
-
-    private static let nameFont = Font.system(size: 11, weight: .semibold)
-    private static let detailFont = Font.system(size: 10.5)
-    private static let unbounded = CGSize(width: 4000, height: 40)
 
     /// Draws a name, with optionally a size below it (`detail`) or at the
     /// right edge (`trailing`), inside `rect`.
@@ -125,19 +169,18 @@ private struct TreemapTiles: View {
     }
 }
 
-/// Outlines the item under the pointer or selected in the list. Kept apart
+/// Raises the tile under the pointer or selected in the list. Kept apart
 /// from the tiles so that moving the pointer does not redraw them.
 private struct TreemapHighlight: View {
     @Environment(AppModel.self) private var model
     let items: [TreemapItem]
 
     var body: some View {
-        let target = model.hovered ?? model.selection
-        Canvas { context, _ in
-            guard let target, let item = visibleItem(for: target) else { return }
-            let path = Path(roundedRect: item.rect.insetBy(dx: 1.5, dy: 1.5), cornerRadius: 2)
-            context.fill(path, with: .color(.white.opacity(0.16)))
-            context.stroke(path, with: .color(.white), lineWidth: 2)
+        ZStack {
+            if let target = model.hovered ?? model.selection, let item = visibleItem(for: target) {
+                RaisedTile(rect: item.rect)
+                    .id(target.id)
+            }
         }
         .allowsHitTesting(false)
     }
@@ -152,5 +195,32 @@ private struct TreemapHighlight: View {
             current = candidate.parent
         }
         return nil
+    }
+}
+
+private struct RaisedTile: View {
+    let rect: CGRect
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var raised = false
+
+    var body: some View {
+        let lifted = raised || reduceMotion
+        RoundedRectangle(cornerRadius: 4, style: .continuous)
+            .fill(Color.white.opacity(0.16))
+            .overlay(
+                RoundedRectangle(cornerRadius: 4, style: .continuous)
+                    .strokeBorder(Color.white, lineWidth: 2)
+            )
+            .shadow(color: Color.white.opacity(0.7), radius: lifted ? 10 : 0)
+            .frame(width: max(rect.width, 1), height: max(rect.height, 1))
+            .scaleEffect(lifted ? 1.03 : 0.94)
+            .opacity(lifted ? 1 : 0)
+            .position(x: rect.midX, y: rect.midY)
+            .onAppear {
+                withAnimation(.spring(duration: 0.35, bounce: 0.55)) {
+                    raised = true
+                }
+            }
     }
 }

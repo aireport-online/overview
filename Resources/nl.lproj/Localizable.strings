@@ -46,7 +46,11 @@
 "Move this item to the Trash?" = "Dit onderdeel naar de prullenmand verplaatsen?";
 "“%@” (%@) will be moved to the Trash. You can put it back from there." = "‘%@’ (%@) wordt naar de prullenmand verplaatst. Je kunt het daar weer terugzetten.";
 
+"Turn sound effects off" = "Zet geluidseffecten uit";
+"Turn sound effects on" = "Zet geluidseffecten aan";
+
 /* Menu bar */
+"Sound Effects" = "Geluidseffecten";
 "Scan Folder…" = "Scan map…";
 "Scan Home Folder" = "Scan thuismap";
 "Go to Enclosing Folder" = "Ga naar bovenliggende map";

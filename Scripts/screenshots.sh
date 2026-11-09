@@ -41,6 +41,7 @@ shoot() {
         exit 1
     fi
 
+    echo "$name: window at $x,$y size $width x $height"
     local skip=""
     if [[ -n "${POINTER:-}" ]]; then
         if [[ "$width $height" == "$POINTER_WINDOW" ]]; then
@@ -62,21 +63,38 @@ shoot() {
     while kill -0 "$pid" 2>/dev/null; do sleep 0.2; done
 }
 
-shoot welcome
-DELAY=3 shoot scanning --args -scan /
-shoot sunburst --args -appearance light -chartStyle sunburst -scan "$SAMPLE"
-shoot treemap --args -appearance light -chartStyle treemap -scan "$SAMPLE"
-shoot sunburst-dark --args -appearance dark -chartStyle sunburst -scan "$SAMPLE"
-shoot treemap-dark --args -appearance dark -chartStyle treemap -scan "$SAMPLE"
+# The build machine starts with a small screen; ask for a larger one.
+if [[ -n "${CI:-}" ]]; then
+    swift Scripts/display-mode.swift 1920 1080 || true
+    sleep 2
+fi
+SIZE="-windowSize 1280x800"
+
+# shellcheck disable=SC2086
+{
+shoot welcome --args $SIZE
+DELAY=3 shoot scanning --args $SIZE -scan /
+shoot sunburst --args $SIZE -chartStyle sunburst -scan "$SAMPLE"
+shoot treemap --args $SIZE -chartStyle treemap -scan "$SAMPLE"
 # The way Finder opens a folder with the app: by Dock icon or "Open With".
 shoot opened-folder "$SAMPLE"
-# Click the Movies arc to open that folder, then point at its largest file.
-POINTER="click 357 296; move 395 368" shoot zoomed --args -appearance light -chartStyle sunburst -scan "$SAMPLE"
-# Click the Movies tile in the treemap, then point at a file.
-POINTER="click 120 200; move 120 250" shoot zoomed-treemap --args -appearance dark -chartStyle treemap -scan "$SAMPLE"
 # The Dutch translation, with the list of largest files.
-shoot welcome-nl --args -AppleLanguages "(nl)" -appearance light
-shoot largest-files-nl --args -AppleLanguages "(nl)" -appearance light -chartStyle sunburst -sidebarTab largest -scan "$SAMPLE"
+shoot welcome-nl --args $SIZE -AppleLanguages "(nl)"
+shoot largest-files-nl --args $SIZE -AppleLanguages "(nl)" -chartStyle sunburst -sidebarTab largest -scan "$SAMPLE"
+}
+
+# A short recording of a scan from launch, to see the animations.
+screencapture -x -v -V 9 "$OUT/launch.mov" &
+RECORDER=$!
+sleep 1
+# shellcheck disable=SC2086
+open -n -a "$APP" --args $SIZE -chartStyle sunburst -scan "$SAMPLE"
+for _ in $(seq 1 30); do
+    kill -0 "$RECORDER" 2>/dev/null || break
+    sleep 1
+done
+kill "$RECORDER" 2>/dev/null || true
+pkill -x Overview || true
 
 rm -rf "$SAMPLE"
 ls -l "$OUT"

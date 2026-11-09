@@ -21,7 +21,8 @@ rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BINARY" "$APP/Contents/MacOS/Overview"
 cp Resources/Info.plist "$APP/Contents/Info.plist"
-cp -R Resources/en.lproj Resources/nl.lproj "$APP/Contents/Resources/"
+cp -R Resources/en.lproj Resources/nl.lproj Resources/Sounds "$APP/Contents/Resources/"
+cp Resources/Hero.png "$APP/Contents/Resources/"
 
 # The icon: one PNG scaled to every size macOS asks for.
 ICONSET="$(mktemp -d)/AppIcon.iconset"

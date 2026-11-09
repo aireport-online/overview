@@ -4,63 +4,34 @@ import SwiftUI
 struct ResultsView: View {
     @Environment(AppModel.self) private var model
     @AppStorage("chartStyle") private var chartStyle: ChartStyle = .sunburst
+    @AppStorage("soundEnabled") private var soundEnabled = true
 
     var body: some View {
-        VStack(spacing: 0) {
+        VStack(spacing: 10) {
             if let focus = model.focus {
-                BreadcrumbBar(focus: focus)
-                Divider()
+                TopBar(focus: focus, chartStyle: $chartStyle, soundEnabled: $soundEnabled)
+
                 if model.unreadableCount > 0 && model.showsUnreadableBanner {
                     UnreadableBanner(count: model.unreadableCount)
-                    Divider()
+                        .transition(.move(edge: .top).combined(with: .opacity))
                 }
-                HSplitView {
+
+                HStack(spacing: 14) {
                     chart(for: focus)
-                        .frame(minWidth: 420, maxWidth: .infinity, maxHeight: .infinity)
-                        .background(Color(nsColor: .windowBackgroundColor))
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                     SidebarView(focus: focus, revision: model.revision)
-                        .frame(minWidth: 280, idealWidth: 340, maxWidth: 520, maxHeight: .infinity)
+                        .frame(width: Theme.sidebarWidth)
+                        .appear(2, horizontal: true)
                 }
-                Divider()
+
                 StatusBar()
             }
         }
-        .navigationTitle(model.target?.title ?? "")
-        .navigationSubtitle(subtitle)
-        .toolbar {
-            ToolbarItem(placement: .navigation) {
-                Button {
-                    model.showWelcome()
-                } label: {
-                    Label("Start Over", systemImage: "chevron.backward")
-                }
-                .help("Choose another disk or folder")
-            }
-            ToolbarItem(placement: .navigation) {
-                Button {
-                    model.goUp()
-                } label: {
-                    Label("Enclosing Folder", systemImage: "arrow.up")
-                }
-                .disabled(!model.canGoUp)
-                .help("Go to the enclosing folder")
-            }
-            ToolbarItem(placement: .principal) {
-                Picker("Chart", selection: $chartStyle) {
-                    Text("Sunburst").tag(ChartStyle.sunburst)
-                    Text("Treemap").tag(ChartStyle.treemap)
-                }
-                .pickerStyle(.segmented)
-                .help("Switch between the sunburst and the treemap")
-            }
-            ToolbarItem(placement: .primaryAction) {
-                Button {
-                    model.rescan()
-                } label: {
-                    Label("Scan Again", systemImage: "arrow.clockwise")
-                }
-                .help("Scan this location again")
-            }
+        .padding(.horizontal, 14)
+        .padding(.bottom, 14)
+        .animation(.spring(duration: 0.4, bounce: 0.2), value: model.showsUnreadableBanner)
+        .onChange(of: chartStyle) {
+            SoundPlayer.shared.play(.select)
         }
         .confirmationDialog(
             "Move this item to the Trash?",
@@ -85,19 +56,17 @@ struct ResultsView: View {
                 description: Text("This folder is empty or takes no space on disk.")
             )
         } else {
-            switch chartStyle {
-            case .sunburst:
-                SunburstChart(focus: focus, revision: model.revision)
-            case .treemap:
-                TreemapChart(focus: focus, revision: model.revision)
+            ZStack {
+                switch chartStyle {
+                case .sunburst:
+                    SunburstChart(focus: focus, revision: model.revision)
+                        .transition(.scale(scale: 0.9).combined(with: .opacity))
+                case .treemap:
+                    TreemapChart(focus: focus, revision: model.revision)
+                        .transition(.scale(scale: 0.9).combined(with: .opacity))
+                }
             }
         }
-    }
-
-    private var subtitle: String {
-        guard let root = model.root else { return "" }
-        let seconds = model.scanDuration.formatted(.number.precision(.fractionLength(1)))
-        return String(localized: "\(Format.bytes(root.size)) · \(Format.files(root.fileCount)) · scanned in \(seconds) s")
     }
 
     private var trashIsPresented: Binding<Bool> {
@@ -108,40 +77,85 @@ struct ResultsView: View {
     }
 }
 
+/// Navigation on the left, view options on the right.
+private struct TopBar: View {
+    @Environment(AppModel.self) private var model
+    let focus: FileNode
+    @Binding var chartStyle: ChartStyle
+    @Binding var soundEnabled: Bool
+
+    var body: some View {
+        HStack(spacing: 8) {
+            GlassIconButton("chevron.backward", help: "Choose another disk or folder") {
+                model.showWelcome()
+            }
+            GlassIconButton("arrow.up", help: "Go to the enclosing folder") {
+                model.goUp()
+            }
+            .disabled(!model.canGoUp)
+
+            Breadcrumbs(focus: focus)
+
+            Spacer(minLength: 8)
+
+            GlassSegmentedControl(
+                selection: $chartStyle,
+                options: [(ChartStyle.sunburst, "Sunburst"), (ChartStyle.treemap, "Treemap")]
+            )
+            .frame(width: 190)
+
+            GlassIconButton(
+                soundEnabled ? "speaker.wave.2.fill" : "speaker.slash.fill",
+                help: soundEnabled ? "Turn sound effects off" : "Turn sound effects on"
+            ) {
+                soundEnabled.toggle()
+            }
+            GlassIconButton("arrow.clockwise", help: "Scan this location again") {
+                model.rescan()
+            }
+        }
+        .frame(height: 36)
+        .appear(0)
+    }
+}
+
 /// The path from the scanned folder down to the folder on screen.
-private struct BreadcrumbBar: View {
+private struct Breadcrumbs: View {
     @Environment(AppModel.self) private var model
     let focus: FileNode
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 4) {
+            HStack(spacing: 2) {
                 ForEach(Array(focus.ancestry.enumerated()), id: \.element.id) { index, node in
                     if index > 0 {
                         Image(systemName: "chevron.right")
-                            .font(.caption2.weight(.semibold))
-                            .foregroundStyle(.tertiary)
+                            .font(.system(size: 9, weight: .bold))
+                            .foregroundStyle(Color.white.opacity(0.35))
                     }
                     Button {
                         model.zoom(to: node)
                     } label: {
                         HStack(spacing: 5) {
-                            Image(systemName: index == 0 ? "internaldrive" : "folder.fill")
-                                .foregroundStyle(.secondary)
+                            Image(systemName: index == 0 ? "internaldrive.fill" : "folder.fill")
+                                .foregroundStyle(Color.white.opacity(0.6))
                             Text(model.title(for: node))
                                 .fontWeight(node === focus ? .semibold : .regular)
+                                .foregroundStyle(Color.white.opacity(node === focus ? 1 : 0.75))
                         }
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 3)
-                        .contentShape(Rectangle())
+                        .font(.system(size: 13))
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 5)
+                        .background(Color.white.opacity(node === focus ? 0.14 : 0), in: Capsule())
+                        .contentShape(Capsule())
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(PressableStyle())
+                    .transition(.scale(scale: 0.7).combined(with: .opacity))
                 }
             }
-            .padding(.horizontal, 8)
+            .padding(.horizontal, 4)
+            .animation(.spring(duration: 0.4, bounce: 0.3), value: focus.id)
         }
-        .frame(height: 30)
-        .background(.bar)
     }
 }
 
@@ -160,17 +174,14 @@ private struct UnreadableBanner: View {
             Button("Open Privacy Settings") {
                 model.openPrivacySettings()
             }
-            Button {
+            .buttonStyle(GlassButtonStyle())
+            GlassIconButton("xmark", help: "Hide this message") {
                 model.showsUnreadableBanner = false
-            } label: {
-                Image(systemName: "xmark")
             }
-            .buttonStyle(.borderless)
-            .help("Hide this message")
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 7)
-        .background(Color.yellow.opacity(0.14))
+        .padding(.horizontal, 14)
+        .padding(.vertical, 8)
+        .glassPanel(cornerRadius: 16)
     }
 }
 
@@ -181,28 +192,32 @@ private struct StatusBar: View {
     var body: some View {
         HStack(spacing: 12) {
             if let node = model.hovered ?? model.selection ?? model.focus {
+                Image(systemName: node.isDirectory ? "folder.fill" : "doc.fill")
+                    .foregroundStyle(Color.white.opacity(0.5))
                 Text(node.path)
                     .lineLimit(1)
                     .truncationMode(.middle)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.white.opacity(0.7))
                 Spacer(minLength: 8)
                 if node.isDirectory {
                     Text(Format.files(node.fileCount))
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.white.opacity(0.6))
                 }
                 if let root = model.root, root.size > 0 {
                     Text(Format.percent(Double(node.size) / Double(root.size)))
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.white.opacity(0.6))
                 }
                 Text(Format.bytes(node.size))
                     .fontWeight(.semibold)
+                    .contentTransition(.numericText())
             }
         }
         .font(.callout)
         .monospacedDigit()
-        .padding(.horizontal, 12)
-        .frame(height: 28)
-        .background(.bar)
+        .padding(.horizontal, 14)
+        .frame(height: 34)
+        .glassPanel(cornerRadius: 12)
+        .appear(3)
     }
 }
 

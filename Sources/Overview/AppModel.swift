@@ -30,6 +30,12 @@ final class AppModel {
 
     private(set) var phase: Phase = .welcome
     private(set) var volumes: [VolumeInfo] = []
+    /// Folders scanned before, most recent first.
+    private(set) var recents: [String] = UserDefaults.standard.stringArray(forKey: "recentFolders") ?? []
+
+    /// The scanning screen stays at least this long, so a quick scan does not
+    /// flash by.
+    private static let minimumScanTime: TimeInterval = 1.4
 
     // Scanning
     private(set) var target: ScanTarget?
@@ -60,6 +66,15 @@ final class AppModel {
 
     func refreshVolumes() {
         volumes = VolumeInfo.mounted()
+        recents = recents.filter { FileManager.default.fileExists(atPath: $0) }
+    }
+
+    private func remember(_ target: ScanTarget) {
+        guard target.expectedBytes == nil else { return } // disks are always listed
+        recents.removeAll { $0 == target.path }
+        recents.insert(target.path, at: 0)
+        recents = Array(recents.prefix(3))
+        UserDefaults.standard.set(recents, forKey: "recentFolders")
     }
 
     func chooseFolder() {
@@ -121,12 +136,17 @@ final class AppModel {
         self.scanner = scanner
         self.target = target
         phase = .scanning
+        SoundPlayer.shared.play(.scanStart)
 
         scanTask = Task { [weak self] in
             let started = Date()
             do {
                 let tree = try await scanner.scan(path: target.path)
-                self?.finish(tree, scanner: scanner, duration: Date().timeIntervalSince(started))
+                let duration = Date().timeIntervalSince(started)
+                if duration < Self.minimumScanTime {
+                    try await Task.sleep(for: .seconds(Self.minimumScanTime - duration))
+                }
+                self?.finish(tree, scanner: scanner, duration: duration)
             } catch is CancellationError {
                 // Cancelled by the user; `cancelScan` already updated the UI.
             } catch {
@@ -146,6 +166,10 @@ final class AppModel {
         self.scanner = nil
         scanTask = nil
         phase = .results
+        if let target {
+            remember(target)
+        }
+        SoundPlayer.shared.play(.scanComplete)
     }
 
     private func fail(_ error: Error, scanner: DiskScanner) {
@@ -184,10 +208,12 @@ final class AppModel {
         focus = parent
         selection = current
         hovered = nil
+        SoundPlayer.shared.play(.zoomOut)
     }
 
     /// Shows the contents of `node`, or for a file, its folder with the file selected.
     func zoom(to node: FileNode) {
+        let previous = focus
         if node.isDirectory {
             focus = node
             selection = nil
@@ -196,6 +222,20 @@ final class AppModel {
             selection = node
         }
         hovered = nil
+        if let previous, let focus, focus !== previous {
+            SoundPlayer.shared.play(focus.isDescendant(of: previous) ? .zoomIn : .zoomOut)
+        } else {
+            SoundPlayer.shared.play(.select)
+        }
+    }
+
+    /// Selects an item without leaving the folder on screen.
+    func select(_ node: FileNode?) {
+        guard selection !== node else { return }
+        selection = node
+        if node != nil {
+            SoundPlayer.shared.play(.select)
+        }
     }
 
     /// A click in the treemap goes one level deeper, towards the tile clicked.
@@ -204,7 +244,7 @@ final class AppModel {
         if child.isDirectory && !child.children.isEmpty {
             zoom(to: child)
         } else {
-            selection = child
+            select(child)
         }
     }
 
@@ -215,7 +255,7 @@ final class AppModel {
         } else if let parent = node.parent, parent !== focus {
             zoom(to: node)
         } else {
-            selection = node
+            select(node)
         }
     }
 
@@ -270,6 +310,7 @@ final class AppModel {
         contextNode = nil
         node.removeFromParent()
         revision += 1
+        SoundPlayer.shared.play(.trash)
     }
 
     func openPrivacySettings() {
