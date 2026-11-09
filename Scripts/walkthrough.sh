@@ -38,8 +38,8 @@ echo "window at $X,$Y size $WIDTH x $HEIGHT"
 # Compile the pointer driver first, so the steps start on time.
 swiftc -O -o "$OUT/pointer" Scripts/pointer.swift
 
-# Long enough for all the steps below (about 76 seconds) and a little more.
-screencapture -x -C -k -v -V 84 "$OUT/walkthrough.mov" &
+# Long enough for all the steps below (about 80 seconds) and a little more.
+screencapture -x -C -k -v -V 88 "$OUT/walkthrough.mov" &
 RECORDER=$!
 sleep 2
 python3 -c 'import time; print("recording", "%.3f" % time.time())' > "$OUT/marks.txt"
@@ -118,7 +118,7 @@ wait 0.3
 mark zoom-out
 click
 wait 1.8
-# 7. Largest files, and the menu of one of them.
+# 7. Largest files: move one to the Trash through its menu.
 mark largest
 move 1173 102 1.0
 wait 0.3
@@ -128,19 +128,17 @@ wait 1.6
 move 1067 206 0.9
 wait 0.8
 rightclick
-wait 2.2
-key 125
-wait 0.3
-key 125
-wait 0.3
-key 125
-wait 0.8
+wait 1.6
+move 1170 271 0.6
+wait 0.7
 mark menu
-key 36
+click
+wait 1.8
+move 640 477 0.9
+wait 0.8
+mark trash
+click
 wait 3.0
-mark dialog
-key 53
-wait 1.5
 # 8. Back to the sunburst.
 mark outro
 move 1049 46 1.0
