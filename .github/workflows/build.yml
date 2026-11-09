@@ -16,7 +16,7 @@ jobs:
     runs-on: macos-15
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Test
         run: swift test
@@ -30,12 +30,12 @@ jobs:
       - name: Zip the app
         run: ditto -c -k --keepParent build/Overview.app build/Overview.zip
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: Overview
           path: build/Overview.zip
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         if: always()
         with:
           name: screenshots

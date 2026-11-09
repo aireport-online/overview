@@ -1,4 +1,7 @@
 import Foundation
+#if canImport(CoreGraphics)
+import CoreGraphics
+#endif
 
 /// One arc of a sunburst chart. Angles are in radians, 0 at twelve o'clock,
 /// increasing clockwise, in the range 0...2π.
