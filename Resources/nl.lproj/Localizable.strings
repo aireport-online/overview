@@ -51,6 +51,10 @@
 
 /* Menu bar */
 "Sound Effects" = "Geluidseffecten";
+"Animations" = "Animaties";
+"Follow System Setting" = "Volg systeeminstelling";
+"Always On" = "Altijd aan";
+"Off" = "Uit";
 "Scan Folder…" = "Scan map…";
 "Scan Home Folder" = "Scan thuismap";
 "Go to Enclosing Folder" = "Ga naar bovenliggende map";

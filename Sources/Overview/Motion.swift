@@ -1,6 +1,25 @@
 import OverviewCore
 import SwiftUI
 
+/// How the app is asked to animate: follow System Settings, or always, or never.
+enum AnimationSetting: String {
+    case system
+    case on
+    case off
+}
+
+private struct ReduceAnimationsKey: EnvironmentKey {
+    static let defaultValue = false
+}
+
+extension EnvironmentValues {
+    /// True when views should appear in their final state instead of animating.
+    var reduceAnimations: Bool {
+        get { self[ReduceAnimationsKey.self] }
+        set { self[ReduceAnimationsKey.self] = newValue }
+    }
+}
+
 /// Fades and slides a view in when it appears. Views with a higher `index`
 /// follow a little later, so a group arrives as a cascade.
 struct Appear: ViewModifier {
@@ -8,7 +27,7 @@ struct Appear: ViewModifier {
     var distance: CGFloat = 14
     var horizontal = false
 
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.reduceAnimations) private var reduceMotion
     @State private var shown = false
 
     func body(content: Content) -> some View {
@@ -55,7 +74,7 @@ struct CountUp: View {
     let target: Int64
     var duration = 0.9
 
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.reduceAnimations) private var reduceMotion
     @State private var shown: Double = 0
 
     var body: some View {
@@ -187,7 +206,7 @@ struct GlassSegmentedControl<Value: Hashable>: View {
 struct ScanButton: View {
     let action: () -> Void
 
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.reduceAnimations) private var reduceMotion
     @State private var hovering = false
     @State private var pulsing = false
 

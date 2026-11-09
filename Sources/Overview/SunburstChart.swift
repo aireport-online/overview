@@ -98,7 +98,7 @@ private struct SunburstBloom: View {
     let segments: [SunburstSegment]
     let geometry: SunburstGeometry
 
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.reduceAnimations) private var reduceMotion
     @State private var progress = 0.0
 
     var body: some View {
@@ -190,7 +190,7 @@ private struct LiftedArc: View {
     let segment: SunburstSegment
     let geometry: SunburstGeometry
 
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.reduceAnimations) private var reduceMotion
     @State private var lift = 0.0
 
     var body: some View {

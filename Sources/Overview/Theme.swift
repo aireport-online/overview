@@ -37,7 +37,7 @@ enum Assets {
 /// The window background: a dark gradient with three soft lights that drift
 /// slowly, so the window never looks completely still.
 struct AuroraBackground: View {
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.reduceAnimations) private var reduceMotion
     @State private var drift = false
 
     var body: some View {
@@ -80,13 +80,17 @@ struct AuroraBackground: View {
 }
 
 extension View {
-    /// A frosted panel with a hairline border.
-    func glassPanel(cornerRadius: CGFloat = 20) -> some View {
-        background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .strokeBorder(Color.white.opacity(0.14), lineWidth: 1)
-            )
+    /// A translucent panel with a hairline border: light for cards, dark for
+    /// the panels that hold lists and text. Drawn with plain colours rather
+    /// than a system material, so it looks the same with "Reduce
+    /// transparency" on and never shows the desktop through the window.
+    func glassPanel(cornerRadius: CGFloat = 20, dark: Bool = false) -> some View {
+        let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+        let colors = dark
+            ? [Color.black.opacity(0.34), Color.black.opacity(0.26)]
+            : [Color.white.opacity(0.17), Color.white.opacity(0.08)]
+        return background(LinearGradient(colors: colors, startPoint: .top, endPoint: .bottom), in: shape)
+            .overlay(shape.strokeBorder(Color.white.opacity(0.16), lineWidth: 1))
     }
 }
 

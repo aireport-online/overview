@@ -102,7 +102,7 @@ private struct TopBar: View {
                 selection: $chartStyle,
                 options: [(ChartStyle.sunburst, "Sunburst"), (ChartStyle.treemap, "Treemap")]
             )
-            .frame(width: 190)
+            .frame(width: 240)
 
             GlassIconButton(
                 soundEnabled ? "speaker.wave.2.fill" : "speaker.slash.fill",
@@ -216,7 +216,7 @@ private struct StatusBar: View {
         .monospacedDigit()
         .padding(.horizontal, 14)
         .frame(height: 34)
-        .glassPanel(cornerRadius: 12)
+        .glassPanel(cornerRadius: 12, dark: true)
         .appear(3)
     }
 }

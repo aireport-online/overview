@@ -116,7 +116,7 @@ struct WelcomeView: View {
 private struct HeroDisc: View {
     let lean: CGSize
 
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.reduceAnimations) private var reduceMotion
     @State private var floating = false
 
     var body: some View {
@@ -199,7 +199,7 @@ private struct LocationCard: View {
 private struct UsageBar: View {
     let fraction: Double
 
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.reduceAnimations) private var reduceMotion
     @State private var filled = false
 
     private var colors: [Color] {

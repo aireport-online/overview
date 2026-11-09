@@ -40,7 +40,7 @@ enum Palette {
 
     /// Sunburst arcs get lighter towards the outside; files are paler than folders.
     static func arc(branch: Int, ring: Int, isDirectory: Bool) -> Color {
-        let saturation = max(0.28, 0.80 - 0.12 * Double(ring)) * (isDirectory ? 1 : 0.68)
+        let saturation = max(0.34, 0.82 - 0.10 * Double(ring)) * (isDirectory ? 1 : 0.78)
         let brightness = min(1.0, 0.93 + 0.02 * Double(ring))
         return Color(hue: hue(branch), saturation: saturation, brightness: brightness)
     }

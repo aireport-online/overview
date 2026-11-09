@@ -49,7 +49,7 @@ struct TreemapChart: View {
 private struct TreemapBloom: View {
     let items: [TreemapItem]
 
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.reduceAnimations) private var reduceMotion
     @State private var progress = 0.0
 
     var body: some View {
@@ -201,7 +201,7 @@ private struct TreemapHighlight: View {
 private struct RaisedTile: View {
     let rect: CGRect
 
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.reduceAnimations) private var reduceMotion
     @State private var raised = false
 
     var body: some View {

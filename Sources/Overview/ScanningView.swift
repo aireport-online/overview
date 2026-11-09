@@ -6,7 +6,7 @@ struct ScanningView: View {
 
     var body: some View {
         TimelineView(.periodic(from: .now, by: 0.2)) { _ in
-            let progress = model.scanner?.progress.snapshot ?? .init()
+            let progress = model.scanner?.progress.snapshot ?? model.lastProgress
             VStack(spacing: 22) {
                 Text("Scanning \(model.target?.title ?? "")…")
                     .font(.system(size: 22, weight: .semibold, design: .rounded))
@@ -54,7 +54,7 @@ struct ScanningView: View {
 private struct ScanOrb: View {
     let fraction: Double?
 
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.reduceAnimations) private var reduceMotion
     @State private var spinning = false
     @State private var breathing = false
 

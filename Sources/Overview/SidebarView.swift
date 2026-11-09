@@ -53,7 +53,7 @@ struct SidebarView: View {
             // A new folder gets a new list, so its rows cascade in again.
             .id(ListKey(focus: focus.id, revision: revision))
         }
-        .glassPanel(cornerRadius: 20)
+        .glassPanel(cornerRadius: 20, dark: true)
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
         .onChange(of: tab) {
             SoundPlayer.shared.play(.select)
@@ -191,7 +191,7 @@ private struct ShareBar: View {
     let fraction: Double
     let color: Color
 
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.reduceAnimations) private var reduceMotion
     @State private var grown = false
 
     var body: some View {

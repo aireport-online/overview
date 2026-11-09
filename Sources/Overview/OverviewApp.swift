@@ -7,6 +7,7 @@ struct OverviewApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @State private var model = AppModel.shared
     @AppStorage("soundEnabled") private var soundEnabled = true
+    @AppStorage("animations") private var animations: AnimationSetting = .system
 
     var body: some Scene {
         Window("Overview", id: "main") {
@@ -31,6 +32,11 @@ struct OverviewApp: App {
                     .disabled(!model.canGoUp)
                 Divider()
                 Toggle("Sound Effects", isOn: $soundEnabled)
+                Picker("Animations", selection: $animations) {
+                    Text("Follow System Setting").tag(AnimationSetting.system)
+                    Text("Always On").tag(AnimationSetting.on)
+                    Text("Off").tag(AnimationSetting.off)
+                }
             }
         }
     }
@@ -72,6 +78,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
 struct RootView: View {
     @Environment(AppModel.self) private var model
+    @Environment(\.accessibilityReduceMotion) private var systemReducesMotion
+    @AppStorage("animations") private var animations: AnimationSetting = .system
+
+    private var reduceAnimations: Bool {
+        switch animations {
+        case .system: return systemReducesMotion
+        case .on: return false
+        case .off: return true
+        }
+    }
 
     var body: some View {
         ZStack {
@@ -81,10 +97,14 @@ struct RootView: View {
                     .transition(.opacity.combined(with: .scale(scale: 0.96)))
             case .scanning:
                 ScanningView()
-                    .transition(.opacity.combined(with: .scale(scale: 1.06)))
+                    .transition(.asymmetric(
+                        insertion: .opacity.combined(with: .scale(scale: 0.92)),
+                        // Leaves quickly, so it is gone before the chart opens.
+                        removal: .opacity.combined(with: .scale(scale: 1.12)).animation(.easeIn(duration: 0.16))
+                    ))
             case .results:
                 ResultsView()
-                    .transition(.opacity.combined(with: .scale(scale: 0.96)))
+                    .transition(.opacity.animation(.easeOut(duration: 0.3).delay(0.12)))
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -101,6 +121,7 @@ struct RootView: View {
                 .ignoresSafeArea(edges: .top)
                 .allowsHitTesting(false)
         }
+        .environment(\.reduceAnimations, reduceAnimations)
         .preferredColorScheme(.dark)
         // A folder dropped on the Dock icon or opened with "Open With".
         .onOpenURL { url in

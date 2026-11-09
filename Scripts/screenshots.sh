@@ -17,11 +17,11 @@ Scripts/make-sample-folder.sh "$SAMPLE"
 #
 # Optional variables:
 #   DELAY    seconds between launch and picture (default 8)
-#   POINTER  what to do with the pointer first, as "click 357 296; move 395 368"
-#            in points from the top left of the window. The positions are for
-#            the window size in POINTER_WINDOW; with another size the picture
-#            is skipped.
-POINTER_WINDOW="1024 681"
+#   POINTER  steps for Scripts/pointer.swift to run first, separated by ";",
+#            such as "move 529 310 0.5; click; wait 1.5". The positions are
+#            for a window of POINTER_WINDOW points; with another size the
+#            picture is skipped.
+POINTER_WINDOW="1280 800"
 
 shoot() {
     local name="$1"
@@ -45,12 +45,7 @@ shoot() {
     local skip=""
     if [[ -n "${POINTER:-}" ]]; then
         if [[ "$width $height" == "$POINTER_WINDOW" ]]; then
-            local step action px py
-            while IFS= read -r -d ';' step; do
-                read -r action px py <<<"$step"
-                swift Scripts/pointer.swift "$action" "$((x + px))" "$((y + py))"
-                sleep 1
-            done <<<"$POINTER;"
+            printf '%s\n' "$POINTER" | tr ';' '\n' | swift Scripts/pointer.swift "$x" "$y"
         else
             echo "Skipping $name: the window is $width x $height, not $POINTER_WINDOW" >&2
             skip=1
@@ -68,33 +63,27 @@ if [[ -n "${CI:-}" ]]; then
     swift Scripts/display-mode.swift 1920 1080 || true
     sleep 2
 fi
-SIZE="-windowSize 1280x800"
+# A fixed window size, and animations on even where the system reduces motion.
+OPTIONS="-windowSize 1280x800 -animations on"
 
 # shellcheck disable=SC2086
 {
-shoot welcome --args $SIZE
-DELAY=3 shoot scanning --args $SIZE -scan /
-shoot sunburst --args $SIZE -chartStyle sunburst -scan "$SAMPLE"
-shoot treemap --args $SIZE -chartStyle treemap -scan "$SAMPLE"
+shoot welcome --args $OPTIONS
+DELAY=3 shoot scanning --args $OPTIONS -scan /
+shoot sunburst --args $OPTIONS -chartStyle sunburst -scan "$SAMPLE"
+shoot treemap --args $OPTIONS -chartStyle treemap -scan "$SAMPLE"
 # The way Finder opens a folder with the app: by Dock icon or "Open With".
 shoot opened-folder "$SAMPLE"
+# Click the Movies arc to open that folder, then point at its largest file.
+POINTER="move 529 310 0.5; click; wait 1.5; move 574 368 0.5; wait 0.8" \
+    shoot sunburst-zoomed --args $OPTIONS -chartStyle sunburst -scan "$SAMPLE"
+# Click a tile in Movies to open that folder in the treemap, then point at a file.
+POINTER="move 133 180 0.5; click; wait 1.5; move 300 300 0.5; wait 0.8" \
+    shoot treemap-zoomed --args $OPTIONS -chartStyle treemap -scan "$SAMPLE"
 # The Dutch translation, with the list of largest files.
-shoot welcome-nl --args $SIZE -AppleLanguages "(nl)"
-shoot largest-files-nl --args $SIZE -AppleLanguages "(nl)" -chartStyle sunburst -sidebarTab largest -scan "$SAMPLE"
+shoot welcome-nl --args $OPTIONS -AppleLanguages "(nl)"
+shoot largest-files-nl --args $OPTIONS -AppleLanguages "(nl)" -chartStyle sunburst -sidebarTab largest -scan "$SAMPLE"
 }
-
-# A short recording of a scan from launch, to see the animations.
-screencapture -x -v -V 9 "$OUT/launch.mov" &
-RECORDER=$!
-sleep 1
-# shellcheck disable=SC2086
-open -n -a "$APP" --args $SIZE -chartStyle sunburst -scan "$SAMPLE"
-for _ in $(seq 1 30); do
-    kill -0 "$RECORDER" 2>/dev/null || break
-    sleep 1
-done
-kill "$RECORDER" 2>/dev/null || true
-pkill -x Overview || true
 
 rm -rf "$SAMPLE"
 ls -l "$OUT"

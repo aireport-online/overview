@@ -40,6 +40,8 @@ final class AppModel {
     // Scanning
     private(set) var target: ScanTarget?
     private(set) var scanner: DiskScanner?
+    /// The counters of the scan that just ended, for the scanning screen as it leaves.
+    private(set) var lastProgress = ScanProgress.Snapshot()
     @ObservationIgnored private var scanTask: Task<Void, Never>?
 
     // Results
@@ -135,6 +137,7 @@ final class AppModel {
         let scanner = DiskScanner()
         self.scanner = scanner
         self.target = target
+        lastProgress = ScanProgress.Snapshot()
         phase = .scanning
         SoundPlayer.shared.play(.scanStart)
 
@@ -159,7 +162,8 @@ final class AppModel {
         guard self.scanner === scanner else { return }
         root = tree
         focus = tree
-        unreadableCount = scanner.progress.snapshot.unreadableFolders
+        lastProgress = scanner.progress.snapshot
+        unreadableCount = lastProgress.unreadableFolders
         showsUnreadableBanner = true
         scanDuration = duration
         revision += 1

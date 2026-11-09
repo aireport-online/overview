@@ -27,6 +27,9 @@ jobs:
       - name: Launch the app and take screenshots
         run: Scripts/screenshots.sh build/screenshots
 
+      - name: Record the walkthrough
+        run: Scripts/walkthrough.sh build/walkthrough
+
       - name: Zip the app
         run: ditto -c -k --keepParent build/Overview.app build/Overview.zip
 
@@ -40,4 +43,11 @@ jobs:
         with:
           name: screenshots
           path: build/screenshots
+          if-no-files-found: ignore
+
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: walkthrough
+          path: build/walkthrough
           if-no-files-found: ignore
