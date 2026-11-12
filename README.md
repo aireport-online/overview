@@ -1,5 +1,11 @@
 # Overview
 
+## About this publication
+
+This source code accompanies the AI Report masterclass on building software with AI.
+You can study, run, fork and adapt the project under the [MIT license](LICENSE).
+It is a masterclass example project; no hosted service or ongoing maintenance is offered.
+
 A disk space analyzer for macOS. Overview scans a disk or folder and shows what takes up the space, so you can find the things worth cleaning up.
 
 ![The sunburst chart](docs/screenshots/sunburst.png)
